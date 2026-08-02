@@ -163,6 +163,12 @@ class 索引工具:
             if self.自动保存:
                 self.保存索引()
 
+    def 列出文件(self) -> list[str]:
+        return list(self._检查文件集合().keys())
+
+    def 文件_存在(self, 路径: str) -> bool:
+        return 路径 in self._检查文件集合()
+
     def 文件_读取(self, 路径: str) -> dict[str, object]:
         self._文件_检查(路径)
         return copy.deepcopy(self._检查文件集合()[路径])

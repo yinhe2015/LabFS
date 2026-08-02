@@ -97,6 +97,15 @@ class 文件系统:
             raise ValueError('文件大小与数据位置不一致')
         return 映射结果
 
+    def 列出文件(self) -> list[str]:
+        return self.索引.列出文件()
+
+    def 文件存在(self, 路径: str) -> bool:
+        return self.索引.文件_存在(路径)
+
+    def 文件大小(self, 路径: str) -> int:
+        return self.索引.文件_读取(路径)['大小']
+
     def 创建文件(self, 路径: str) -> None:
         self.索引.文件_添加(路径)
 
@@ -106,16 +115,21 @@ class 文件系统:
     def 重命名文件(self, 路径: str, 新路径: str) -> None:
         self.索引.文件_修改_重命名(路径, 新路径)
 
-    def 文件_读取(self, 路径: str, 起始: int, 大小: int) -> bytes:
+    def 文件_读取(self, 路径: str, 起始: int, 大小: int=None) -> bytes:
         索引 = self.索引.文件_读取(路径)
         文件大小 = 索引['大小']
-        if 起始 < 0 or 大小 < 0:
-            raise ValueError('起始位置和大小不能为负数')
-        if 起始 + 大小 > 文件大小:
-            raise ValueError(f'起始位置 {起始} + 大小 {大小} 超过文件大小 {文件大小}')
+        if 大小:
+            if 起始 < 0 or 大小 < 0:
+                raise ValueError('起始位置和大小不能为负数')
+            if 起始 + 大小 > 文件大小:
+                raise ValueError(f'起始位置 {起始} + 大小 {大小} 超过文件大小 {文件大小}')
 
-        数据 = bytearray(大小)
-        for 物理位置, 数据偏移, 读取大小 in self._映射文件区间(索引['数据位置'], 起始, 大小):
+            实际大小 = 大小
+        else:
+            实际大小 = 文件大小 - 起始
+
+        数据 = bytearray(实际大小)
+        for 物理位置, 数据偏移, 读取大小 in self._映射文件区间(索引['数据位置'], 起始, 实际大小):
             self.设备.seek(物理位置)
             读取数据 = self.设备.read(读取大小)
             if len(读取数据) != 读取大小:
