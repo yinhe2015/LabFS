@@ -32,5 +32,4 @@ dist/
 build/
 *.egg-info/
 
-# 项目
-test.py
+# 项目 
